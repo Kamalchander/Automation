@@ -1,10 +1,14 @@
 package com.automation.script.automation;
 
+import java.sql.Driver;
 import java.time.Duration;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Loginlogout {
@@ -32,24 +36,39 @@ public class Loginlogout {
 	}
 
 	// Login into ATS
-	public void login() {
-		driver.findElement(By.name(EMAIL_FIELD)).click();
-		driver.findElement(By.name(EMAIL_FIELD)).sendKeys(USERNAME);
-		driver.findElement(By.name(PASSWORD_FIELD)).click();
-		driver.findElement(By.name(PASSWORD_FIELD)).sendKeys(PASSWORD);
-		driver.findElement(By.xpath(LOGIN_BUTTON)).click();
+	public void login(String username, String password) {
+		WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(EMAIL_FIELD));
+		emailField.sendKeys(username);
+
+		WebElement passwordField = driver.findElement(PASSWORD_FIELD);
+		passwordField.sendKeys(password);
+
+		WebElement loginButton = driver.findElement(LOGIN_BUTTON);
+		loginButton.click();
 	}
 
 	// Logout from ATS
 	public void logout() {
-		driver.findElement(By.xpath(PROFILE_SECTION)).click();
-		driver.findElement(By.xpath(LOGOUT_BUTTON)).click();
-		driver.findElement(By.xpath(CONFIRM_LOGOUT_BUTTON)).click();
+		try {
+			WebElement profileDropdown = wait.until(ExpectedConditions.elementToBeClickable(PROFILE_SECTION));
+			profileDropdown.click();
+
+			WebElement logoutButton = wait.until(ExpectedConditions.elementToBeClickable(LOGOUT_BUTTON));
+			logoutButton.click();
+
+			WebElement confirmLogoutButton = wait.until(ExpectedConditions.elementToBeClickable(CONFIRM_LOGOUT_BUTTON));
+			confirmLogoutButton.click();
+		} catch (Exception e) {
+			System.out.println("Error during Logout" + e.getMessage());
+		}
+
 	}
 
 	// Close the browser
 	public void tearDown() {
-		driver.quit();
+		if (driver != null) {
+			driver.quit();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -60,9 +79,12 @@ public class Loginlogout {
 		script.setup();
 
 		// Call the login method to perform the login action
-		script.login();
+		script.login(USERNAME, PASSWORD);
 
 		// Call the Logout method to perform the logout action
-		script.login();
+		script.logout();
+
+		// Call the TearSown Method
+		script.tearDown();
 	}
 }
